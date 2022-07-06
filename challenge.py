@@ -16,7 +16,6 @@ input_file = sys.argv[1]
 output_file = sys.argv[2]
 
 data = json.load(open(input_file, "r"))
-ALL_ORGS = [x["author_affiliation"] for x in data]
 ABBRS = {
     "u": "University",
     "uni": "University",
@@ -38,6 +37,7 @@ def fix_abbreviations(orgs: list, abbreviations: dict):
     normalized = {}  # not included as a parameter because of testing
     change_count = 0
     for org in orgs:
+        org = org["author_affiliation"]
         if normalized.get(org):
             normal = normalized[org]
         else:
@@ -55,7 +55,7 @@ def fix_abbreviations(orgs: list, abbreviations: dict):
 # TODO: remove repeated phrases like "for the"
 
 if __name__ == "__main__":
-    normalized, change_count = fix_abbreviations(ALL_ORGS, ABBRS)
+    normalized, change_count = fix_abbreviations(data, ABBRS)
     with open(output_file, "w") as f:
         w = csv.writer(f, dialect="excel")
         w.writerow(["original_affiliation", "normalized_affiliation"])

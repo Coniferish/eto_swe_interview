@@ -42,8 +42,8 @@ def fix_abbreviations(orgs: list, abbreviations: dict):
             normal = normalized[org]
         else:
             normal = org
-        for abbr in abbreviations:
-            normal = re.sub(rf"(?i)\b{abbr}($|\.|\b)", abbreviations[abbr], normal)
+            for abbr in abbreviations:
+                normal = re.sub(rf"(?i)\b{abbr}($|\.|\b)", abbreviations[abbr], normal)
             normalized[org] = normal
         if normal != org:
             change_count += 1

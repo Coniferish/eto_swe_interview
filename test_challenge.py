@@ -40,17 +40,17 @@ ORGS = [
     {"U of GA, dept of math": "University of GA, Department of math"},
 ]
 
-
+import ipdb; 
 class FixAbbreviationsTest(unittest.TestCase):
 
     # test that the list of ORGS returns their expected values
     def test_all(self):
         for i in ORGS:
             with self.subTest(i=i):  # using subTest to test each individaul org in ORGS
-                # simply using "list(i.keys())" is returning "Error in argument: '(i.keys())'" for some reason
+                # using "list(i.keys())" is returning "Error in argument: '(i.keys())'" for some reason
                 self.assertEqual(
                     challenge.fix_abbreviations(
-                        [x for x in i.keys()], challenge.abbreviations
+                        [{"author_affiliation":x} for x in i.keys()], challenge.ABBRS
                     ),
                     i,
                 )

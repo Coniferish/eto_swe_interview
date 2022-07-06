@@ -8,12 +8,12 @@ import re
 import sys
 import csv
 
-if len(sys.argv) != 3:
-    raise IndexError(
-        "Please try running again with arguments <input_file_name> <output_filename>"
-    )
-input_file = sys.argv[1]
-output_file = sys.argv[2]
+# if len(sys.argv) != 3:
+#     raise IndexError(
+#         "Please try running again with arguments <input_file_name> <output_filename>"
+#     )
+input_file = input("Enter the name of the input file:\n")
+output_file = input("Enter the name for the output file:\n")
 
 data = json.load(open(input_file, "r"))
 ABBRS = {
@@ -47,7 +47,7 @@ def fix_abbreviations(orgs: list, abbreviations: dict):
             normalized[org] = normal
         if normal != org:
             change_count += 1
-    return normalized, change_count
+    return normalized
 
 
 # TODO: normalize missing values: '', 'na', 'n/a', etc.
@@ -55,9 +55,9 @@ def fix_abbreviations(orgs: list, abbreviations: dict):
 # TODO: remove repeated phrases like "for the"
 
 if __name__ == "__main__":
-    normalized, change_count = fix_abbreviations(data, ABBRS)
+    normalized = fix_abbreviations(data, ABBRS)
     with open(output_file, "w") as f:
         w = csv.writer(f, dialect="excel")
         w.writerow(["original_affiliation", "normalized_affiliation"])
         w.writerows(normalized.items())
-    print(f"File saved as {output_file}\n{change_count} corrections made")
+    print(f"File saved as {output_file}")

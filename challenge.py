@@ -7,12 +7,14 @@ import json
 import re
 import csv
 
-# if len(sys.argv) != 3:
-#     raise IndexError(
-#         "Please try running again with arguments <input_file_name> <output_filename>"
-#     )
-input_file = input("Enter the name of the input file, excluding the file extension:\n") + ".json"
-output_file = input("Enter the name for the output file, excluding the file extension:\n") + ".csv"
+# TODO handle accidental input with the file extension
+input_file = (
+    input("Enter the name of the input file, excluding the file extension:\n") + ".json"
+)
+output_file = (
+    input("Enter the name for the output file, excluding the file extension:\n")
+    + ".csv"
+)
 
 data = json.load(open(input_file, "r"))
 ABBRS = {
@@ -26,22 +28,23 @@ ABBRS = {
     "div": "Division",
     "obs": "Observatory",
     "phys": "Physics",
-    # 'tech': 'Technology' or 'Technological'
+    # 'tech' could be 'Technology' or 'Technological' so it is not included
 }
 
-# this function needs to be separated into smaller functions to separately test
-# that the abbreviations list is being correctly generated
-# and that the test_orgs are changed correctly
-def fix_abbreviations(orgs: list, abbreviations: dict):
-    normalized = {}  # not included as a parameter because of testing
+
+def fix_abbreviations(items: list, abbreviations: dict):
+    normalized = {}
     change_count = 0
-    for org in orgs:
-        org = org["author_affiliation"]
+    for item in items:
+        org = item["author_affiliation"]
         if normalized.get(org):
             normal = normalized[org]
         else:
             normal = org
-            for abbr in abbreviations:
+            for (
+                abbr
+            ) in abbreviations:  # instead of iterating over the abbreviations list,
+                # it might be better to iterate over each word in the org
                 normal = re.sub(rf"(?i)\b{abbr}($|\.|\b)", abbreviations[abbr], normal)
             normalized[org] = normal
         if normal != org:

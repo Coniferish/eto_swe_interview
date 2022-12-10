@@ -3,21 +3,15 @@
 
 """Minimal normalization of json file containing organization affiliation data from https://arxiv.org/"""
 
+from distutils.util import change_root
 import json
 import re
 import csv
+import sys
+import logging
 
-# TODO handle accidental input with the file extension
-input_file = (
-    input("Enter the name of the input file, excluding the file extension:\n") + ".json"
-)
-output_file = (
-    input("Enter the name for the output file, excluding the file extension:\n")
-    + ".csv"
-)
 
-data = json.load(open(input_file, "r"))
-ABBRS = {
+ABBREVIATIONS = {
     "u": "University",
     "uni": "University",
     "univ": "University",
@@ -32,24 +26,26 @@ ABBRS = {
 }
 
 
-def fix_abbreviations(items: list, abbreviations: dict):
+def fix_abbreviations(items: list):
     normalized = {}
+    final_affiliations = []
     change_count = 0
     for item in items:
         org = item["author_affiliation"]
         if normalized.get(org):
-            normal = normalized[org]
-        else:
-            normal = org
-            for (
-                abbr
-            ) in abbreviations:  # instead of iterating over the abbreviations list,
-                # it might be better to iterate over each word in the org
-                normal = re.sub(rf"(?i)\b{abbr}($|\.|\b)", abbreviations[abbr], normal)
-            normalized[org] = normal
-        if normal != org:
+            final_affiliations.append((org, normalized.get(org)))
             change_count += 1
-    return normalized
+        else:
+            normal_org = normalize_name(org)
+            if normal_org != org:
+                change_count += 1
+            final_affiliations.append((org, normal_org))
+    return final_affiliations, change_count
+
+def normalize_name(org):
+    for abbreviation, full in ABBREVIATIONS.items():
+        re.sub(rf"(?i)\b{abbreviation}($|\.|\b)", full, org)
+    return org
 
 
 # TODO: normalize missing values: '', 'na', 'n/a', etc.
@@ -57,9 +53,24 @@ def fix_abbreviations(items: list, abbreviations: dict):
 # TODO: remove repeated phrases like "for the"
 
 if __name__ == "__main__":
-    normalized = fix_abbreviations(data, ABBRS)
+
+    # TODO handle invalid arguments
+    if len(sys.argv) != 3:
+        raise IndexError(
+            "Please try running again with arguments <input_file_name> <output_filename>")
+
+    input_file = sys.argv[1]
+    output_file = sys.argv[2]
+
+    with open(input_file, "r"):
+        data = json.load(open(input_file, "r"))
+
+    normalized, change_count = fix_abbreviations(data)
+    logging.info(change_count)
+
     with open(output_file, "w") as f:
         w = csv.writer(f, dialect="excel")
         w.writerow(["original_affiliation", "normalized_affiliation"])
-        w.writerows(normalized.items())
+        w.writerows(normalized)
     print(f"File saved as {output_file}")
+    

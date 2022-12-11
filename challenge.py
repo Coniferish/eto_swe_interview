@@ -44,7 +44,7 @@ def fix_abbreviations(items: list):
 
 def normalize_name(org):
     for abbreviation, full in ABBREVIATIONS.items():
-        re.sub(rf"(?i)\b{abbreviation}($|\.|\b)", full, org)
+        org = re.sub(rf"(?i)\b{abbreviation}($|\.|\b)", full, org)
     return org
 
 
@@ -66,7 +66,7 @@ if __name__ == "__main__":
         data = json.load(open(input_file, "r"))
 
     normalized, change_count = fix_abbreviations(data)
-    logging.info(change_count)
+    print("change count: " + str(change_count))
 
     with open(output_file, "w") as f:
         w = csv.writer(f, dialect="excel")
